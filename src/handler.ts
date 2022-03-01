@@ -196,7 +196,9 @@ export async function handleRequest(request: Request): Promise<Response> {
     `Bearer ${accessToken ?? SUPABASE_ANON_KEY}`,
   )
 
-  const response = await fetch(supabaseUrl.toString(), supabaseRequest)
+  const supabaseResponse = await fetch(supabaseUrl.toString(), supabaseRequest)
+  // We must copy the response to avoid the "Can't modify immutable headers." error
+  const response = new Response(supabaseResponse.body, supabaseResponse)
 
   response.headers.delete('access-control-allow-credentials')
   response.headers.delete('access-control-allow-headers')

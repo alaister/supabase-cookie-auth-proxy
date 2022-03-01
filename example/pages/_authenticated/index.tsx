@@ -1,6 +1,8 @@
 import AuthenticatedLayout from '../../components/AuthenticatedLayout'
 import { NextPageWithLayout } from '../../lib/types'
-import IndexPage from '../index'
+import IndexPage, { getStaticProps } from '../index'
+
+export { getStaticProps }
 
 const AuthenticatedIndexPage: NextPageWithLayout = (props) => {
   return <IndexPage {...props} />

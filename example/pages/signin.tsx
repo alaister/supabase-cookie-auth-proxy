@@ -5,7 +5,7 @@ import UnauthenticatedLayout from '../components/UnauthenticatedLayout'
 import { useSignInMutation } from '../lib/api/auth'
 import { NextPageWithLayout } from '../lib/types'
 
-const SignIn: NextPageWithLayout = () => {
+const SignInPage: NextPageWithLayout = () => {
   const router = useRouter()
   const { mutate: signIn } = useSignInMutation()
 
@@ -131,8 +131,8 @@ const SignIn: NextPageWithLayout = () => {
   )
 }
 
-SignIn.getLayout = (page) => (
+SignInPage.getLayout = (page) => (
   <UnauthenticatedLayout>{page}</UnauthenticatedLayout>
 )
 
-export default SignIn
+export default SignInPage

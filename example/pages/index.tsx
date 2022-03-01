@@ -1,30 +1,20 @@
-import Link from 'next/link'
+import { GetStaticProps } from 'next'
+import { dehydrate, DehydratedState, QueryClient } from 'react-query'
 import DynamicLayout from '../components/DynamicLayout'
-import { usePostsQuery } from '../lib/api/posts'
+import Posts from '../components/Posts'
+import { getPosts } from '../lib/api/posts'
 import { NextPageWithLayout } from '../lib/types'
 
-const Posts = () => {
-  const { data, isLoading } = usePostsQuery()
+export const getStaticProps: GetStaticProps<{
+  dehydratedState: DehydratedState
+}> = async () => {
+  const queryClient = new QueryClient()
 
-  if (isLoading) {
-    return (
-      <ul>
-        <li>Loading...</li>
-      </ul>
-    )
+  await queryClient.prefetchQuery(['posts'], ({ signal }) => getPosts(signal))
+
+  return {
+    props: { dehydratedState: dehydrate(queryClient) },
   }
-
-  return (
-    <ul>
-      {data?.posts.map((post) => (
-        <li key={post.id}>
-          <Link href={`/posts/${post.id}`}>
-            <a>{post.title}</a>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  )
 }
 
 const IndexPage: NextPageWithLayout = () => {
