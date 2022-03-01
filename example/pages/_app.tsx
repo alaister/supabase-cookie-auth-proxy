@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query'
-import { NotFoundError } from '../lib/api/utils'
+import { NotFoundError, UnauthenticatedError } from '../lib/api/utils'
+import { AuthProvider } from '../lib/auth'
 import { AppPropsWithLayout } from '../lib/types'
 import '../styles/globals.css'
 
@@ -12,7 +13,10 @@ const CustomApp = ({ Component, pageProps }: AppPropsWithLayout) => {
           queries: {
             retry: (failureCount, error) => {
               // Don't retry on 404s
-              if (error instanceof NotFoundError) {
+              if (
+                error instanceof NotFoundError ||
+                error instanceof UnauthenticatedError
+              ) {
                 return false
               }
 
@@ -32,7 +36,7 @@ const CustomApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
-        {getLayout(<Component {...pageProps} />)}
+        <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
       </Hydrate>
     </QueryClientProvider>
   )

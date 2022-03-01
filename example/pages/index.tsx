@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import UnauthenticatedLayout from '../components/UnauthenticatedLayout'
+import DynamicLayout from '../components/DynamicLayout'
 import { usePostsQuery } from '../lib/api/posts'
 import { NextPageWithLayout } from '../lib/types'
 
@@ -37,8 +37,6 @@ const IndexPage: NextPageWithLayout = () => {
   )
 }
 
-IndexPage.getLayout = (page) => (
-  <UnauthenticatedLayout>{page}</UnauthenticatedLayout>
-)
+IndexPage.getLayout = (page) => <DynamicLayout>{page}</DynamicLayout>
 
 export default IndexPage

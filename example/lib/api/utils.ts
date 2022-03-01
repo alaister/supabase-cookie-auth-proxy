@@ -1,4 +1,5 @@
 export class NotFoundError extends Error {}
+export class UnauthenticatedError extends Error {}
 
 export const DEFAULT_PAGE_SIZE = 20
 

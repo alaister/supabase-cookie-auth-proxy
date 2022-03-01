@@ -37,11 +37,6 @@ async function getSession(cookiesStr?: string | null) {
   }
 }
 
-// const developmentCorsHeaders = {
-//   'Access-Control-Allow-Origin': 'http://localhost:3000',
-//   'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
-// }
-
 export async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url)
 
@@ -55,6 +50,8 @@ export async function handleRequest(request: Request): Promise<Response> {
     upgradeHeader === 'websocket' &&
     url.pathname === '/realtime/v1/websocket'
   ) {
+    // TODO: check origin matches
+
     const accessToken =
       (await getSession(request.headers.get('Cookie')))?.token ??
       SUPABASE_ANON_KEY
@@ -199,5 +196,12 @@ export async function handleRequest(request: Request): Promise<Response> {
     `Bearer ${accessToken ?? SUPABASE_ANON_KEY}`,
   )
 
-  return fetch(supabaseUrl.toString(), supabaseRequest)
+  const response = await fetch(supabaseUrl.toString(), supabaseRequest)
+
+  response.headers.delete('access-control-allow-credentials')
+  response.headers.delete('access-control-allow-headers')
+  response.headers.delete('access-control-allow-methods')
+  response.headers.delete('access-control-allow-origin')
+
+  return response
 }

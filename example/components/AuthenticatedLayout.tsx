@@ -1,7 +1,18 @@
 import Link from 'next/link'
-import { PropsWithChildren } from 'react'
+import { useRouter } from 'next/router'
+import { PropsWithChildren, useEffect } from 'react'
+import { useAuth } from '../lib/auth'
 
 const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
+  const router = useRouter()
+  const { user, isLoading } = useAuth()
+
+  useEffect(() => {
+    if (!isLoading && user === null) {
+      router.push('/signin')
+    }
+  }, [isLoading, user])
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-8 py-4">
@@ -13,7 +24,13 @@ const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <span>Loading...</span>
+            <Link href="/account">
+              <a>
+                {isLoading
+                  ? 'Loading...'
+                  : user?.user_metadata.full_name ?? user?.email ?? 'Account'}
+              </a>
+            </Link>
 
             <Link href="/signout">
               <a>Sign Out</a>
