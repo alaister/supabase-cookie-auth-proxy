@@ -37,10 +37,18 @@ async function getSession(cookiesStr?: string | null) {
   }
 }
 
+// const developmentCorsHeaders = {
+//   'Access-Control-Allow-Origin': 'http://localhost:3000',
+//   'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
+// }
+
 export async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url)
 
-  // /edge/v1/session
+  // URL pathname can optionally start with /supabase
+  if (url.pathname.startsWith('/supabase')) {
+    url.pathname = url.pathname.slice(9)
+  }
 
   const upgradeHeader = request.headers.get('Upgrade')
   if (
@@ -97,8 +105,7 @@ export async function handleRequest(request: Request): Promise<Response> {
     })
   }
 
-  const supabaseUrl = new URL(request.url)
-
+  const supabaseUrl = new URL(url.toString())
   supabaseUrl.hostname = SUPABASE_HOSTNAME
 
   const supabaseRequest = new Request(request)
