@@ -1,6 +1,6 @@
 import { parse, serialize } from 'cookie'
 import jwt from '@tsndr/cloudflare-worker-jwt'
-import { Session, User } from './types'
+import { Session, User, Without } from './types'
 
 declare global {
   const WORKERS_DEMO_KV: KVNamespace
@@ -29,12 +29,22 @@ async function getSession(cookiesStr?: string | null) {
     const cookies = parse(cookiesStr)
     const sessionId = cookies['sb-session-id']
     if (sessionId) {
-      const session = await WORKERS_DEMO_KV.get<Session>(sessionId, 'json')
+      const session = await WORKERS_DEMO_KV.get<Without<Session, 'id'>>(
+        sessionId,
+        'json',
+      )
       if (session) {
-        return session
+        return { id: sessionId, ...session }
       }
     }
   }
+}
+
+function removeCors(response: Response) {
+  response.headers.delete('access-control-allow-credentials')
+  response.headers.delete('access-control-allow-headers')
+  response.headers.delete('access-control-allow-methods')
+  response.headers.delete('access-control-allow-origin')
 }
 
 export async function handleRequest(request: Request): Promise<Response> {
@@ -51,7 +61,6 @@ export async function handleRequest(request: Request): Promise<Response> {
     url.pathname === '/realtime/v1/websocket'
   ) {
     // TODO: check origin matches
-    // TODO: handle {"topic":"realtime:public:comments:post_id=eq.7373b0cb-fea2-4f8a-ba94-21db59c5fed6","event":"access_token","payload":{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNjQ2MTE0ODUyLCJzdWIiOiIxYWMxODRlZS0yNWYwLTQzNDAtODAzMi0zMDY4YTdiNWJhYTYiLCJlbWFpbCI6ImFAYWxhaXN0ZXJ5b3VuZy5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIn0sInVzZXJfbWV0YWRhdGEiOnt9LCJyb2xlIjoiYXV0aGVudGljYXRlZCJ9.swSrLDZ7_h4-gljPk7d79F9QMNGpdb8flrtuM42QTec"},"ref":"7"}
 
     const accessToken =
       (await getSession(request.headers.get('Cookie')))?.token ??
@@ -84,6 +93,20 @@ export async function handleRequest(request: Request): Promise<Response> {
               payload: {
                 ...data.payload,
                 user_token: accessToken,
+              },
+            }),
+          )
+
+          return
+        }
+
+        if (data.event === 'access_token') {
+          supabaseWS.send(
+            JSON.stringify({
+              ...data,
+              payload: {
+                ...data.payload,
+                access_token: accessToken,
               },
             }),
           )
@@ -161,6 +184,8 @@ export async function handleRequest(request: Request): Promise<Response> {
       response.headers.set('Set-Cookie', cookie)
     }
 
+    removeCors(response)
+
     return response
   }
 
@@ -200,11 +225,18 @@ export async function handleRequest(request: Request): Promise<Response> {
   const supabaseResponse = await fetch(supabaseUrl.toString(), supabaseRequest)
   // We must copy the response to avoid the "Can't modify immutable headers." error
   const response = new Response(supabaseResponse.body, supabaseResponse)
+  removeCors(response)
 
-  response.headers.delete('access-control-allow-credentials')
-  response.headers.delete('access-control-allow-headers')
-  response.headers.delete('access-control-allow-methods')
-  response.headers.delete('access-control-allow-origin')
+  if (request.method === 'POST' && url.pathname === '/auth/v1/logout') {
+    if (session) {
+      await WORKERS_DEMO_KV.delete(session.id)
+
+      const cookie = serialize('sb-session-id', session.id, {
+        expires: new Date(0),
+      })
+      response.headers.set('Set-Cookie', cookie)
+    }
+  }
 
   return response
 }

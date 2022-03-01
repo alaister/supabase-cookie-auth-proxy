@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export type Without<T, K> = Pick<T, Exclude<keyof T, K>>
+
 export interface UserIdentity {
   id: string
   user_id: string
@@ -39,6 +41,7 @@ export interface User {
 }
 
 export interface Session {
+  id: string
   user: User
   token: string
 }

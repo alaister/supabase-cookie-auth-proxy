@@ -13,6 +13,7 @@ import {
   useCreateCommentMutation,
 } from '../../lib/api/comments'
 import { getPost, getPosts, usePostQuery } from '../../lib/api/posts'
+import { useIsLoggedIn } from '../../lib/auth'
 import supabase from '../../lib/supabase'
 import { NextPageWithLayout } from '../../lib/types'
 import { firstStr } from '../../utils/generic'
@@ -53,6 +54,7 @@ const PostShowPage: NextPageWithLayout = () => {
   const { data: commentsData, isLoading: isLoadingComments } =
     useCommentsForPostQuery(firstStr(id))
 
+  const isLoggedin = useIsLoggedIn()
   useEffect(() => {
     const subscription = supabase
       .from(`comments:post_id=eq.${firstStr(id)}`)
@@ -94,7 +96,8 @@ const PostShowPage: NextPageWithLayout = () => {
     return () => {
       supabase.removeSubscription(subscription)
     }
-  }, [])
+    // Re-run on login changes
+  }, [isLoggedin])
 
   const { mutate: createComment } = useCreateCommentMutation()
 

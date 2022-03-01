@@ -21,4 +21,9 @@ const supabase = createClient(
   }
 )
 
+if (process.env.NODE_ENV === 'production') {
+  // Set a dummy jwt so logout gets called
+  supabase.auth.setAuth('1')
+}
+
 export default supabase
