@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { PropsWithChildren, useEffect } from 'react'
+import { PropsWithChildren, useCallback, useEffect } from 'react'
+import { useSignOutMutation } from '../lib/api/auth'
 import { useAuth } from '../lib/auth'
 
 const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
@@ -12,6 +13,11 @@ const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
       router.push('/signin')
     }
   }, [isLoading, user])
+
+  const { mutate: signOut } = useSignOutMutation()
+  const onSignOut = useCallback(() => {
+    signOut()
+  }, [])
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -32,9 +38,7 @@ const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
               </a>
             </Link>
 
-            <Link href="/signout">
-              <a>Sign Out</a>
-            </Link>
+            <button onClick={onSignOut}>Sign Out</button>
           </div>
         </nav>
       </header>

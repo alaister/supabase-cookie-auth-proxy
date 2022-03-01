@@ -20,7 +20,7 @@ export const getStaticProps: GetStaticProps<{
 const IndexPage: NextPageWithLayout = () => {
   return (
     <div>
-      <h2>Posts</h2>
+      <h2 className="text-lg font-bold">Posts</h2>
 
       <Posts />
     </div>

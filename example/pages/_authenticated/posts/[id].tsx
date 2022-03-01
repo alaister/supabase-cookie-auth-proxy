@@ -1,6 +1,8 @@
 import AuthenticatedLayout from '../../../components/AuthenticatedLayout'
 import { NextPageWithLayout } from '../../../lib/types'
-import PostShowPage from '../../posts/[id]'
+import PostShowPage, { getStaticPaths, getStaticProps } from '../../posts/[id]'
+
+export { getStaticPaths, getStaticProps }
 
 const AuthenticatedPostShowPage: NextPageWithLayout = (props) => {
   return <PostShowPage {...props} />

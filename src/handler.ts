@@ -51,6 +51,7 @@ export async function handleRequest(request: Request): Promise<Response> {
     url.pathname === '/realtime/v1/websocket'
   ) {
     // TODO: check origin matches
+    // TODO: handle {"topic":"realtime:public:comments:post_id=eq.7373b0cb-fea2-4f8a-ba94-21db59c5fed6","event":"access_token","payload":{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNjQ2MTE0ODUyLCJzdWIiOiIxYWMxODRlZS0yNWYwLTQzNDAtODAzMi0zMDY4YTdiNWJhYTYiLCJlbWFpbCI6ImFAYWxhaXN0ZXJ5b3VuZy5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIn0sInVzZXJfbWV0YWRhdGEiOnt9LCJyb2xlIjoiYXV0aGVudGljYXRlZCJ9.swSrLDZ7_h4-gljPk7d79F9QMNGpdb8flrtuM42QTec"},"ref":"7"}
 
     const accessToken =
       (await getSession(request.headers.get('Cookie')))?.token ??
