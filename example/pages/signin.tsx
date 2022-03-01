@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { FormEvent, useCallback } from 'react'
 import UnauthenticatedLayout from '../components/UnauthenticatedLayout'
 import { useSignInMutation } from '../lib/api/auth'
+import supabase from '../lib/supabase'
 import { NextPageWithLayout } from '../lib/types'
 
 const SignInPage: NextPageWithLayout = () => {
@@ -29,6 +30,12 @@ const SignInPage: NextPageWithLayout = () => {
     [router]
   )
 
+  const signInWithGitHub = useCallback(() => {
+    supabase.auth.signIn({
+      provider: 'github',
+    })
+  }, [])
+
   return (
     <div className="flex items-center justify-center min-h-full px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
@@ -39,7 +46,10 @@ const SignInPage: NextPageWithLayout = () => {
         </div>
 
         <div>
-          <button className="group relative flex w-full items-center justify-center space-x-2 rounded-md border border-transparent bg-[#161614] px-4 py-2 text-sm font-medium text-white hover:bg-[#24292E] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+          <button
+            onClick={signInWithGitHub}
+            className="group relative flex w-full items-center justify-center space-x-2 rounded-md border border-transparent bg-[#161614] px-4 py-2 text-sm font-medium text-white hover:bg-[#24292E] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               preserveAspectRatio="xMidYMid"

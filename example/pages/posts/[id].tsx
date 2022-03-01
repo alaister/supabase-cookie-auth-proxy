@@ -54,7 +54,7 @@ const PostShowPage: NextPageWithLayout = () => {
   const { data: commentsData, isLoading: isLoadingComments } =
     useCommentsForPostQuery(firstStr(id))
 
-  const isLoggedin = useIsLoggedIn()
+  const isLoggedIn = useIsLoggedIn()
   useEffect(() => {
     const subscription = supabase
       .from(`comments:post_id=eq.${firstStr(id)}`)
@@ -97,7 +97,7 @@ const PostShowPage: NextPageWithLayout = () => {
       supabase.removeSubscription(subscription)
     }
     // Re-run on login changes
-  }, [isLoggedin])
+  }, [isLoggedIn])
 
   const { mutate: createComment } = useCreateCommentMutation()
 
@@ -156,21 +156,23 @@ const PostShowPage: NextPageWithLayout = () => {
           )}
         </ul>
 
-        <form onSubmit={onCreateComment} className="flex space-x-2">
-          <input
-            name="body"
-            placeholder="Comment"
-            required
-            type="text"
-            className="relative flex-1 block px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-          />
-          <button
-            type="submit"
-            className="relative flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            Add Comment
-          </button>
-        </form>
+        {isLoggedIn && (
+          <form onSubmit={onCreateComment} className="flex space-x-2">
+            <input
+              name="body"
+              placeholder="Comment"
+              required
+              type="text"
+              className="relative flex-1 block px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+            />
+            <button
+              type="submit"
+              className="relative flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Add Comment
+            </button>
+          </form>
+        )}
       </div>
     </div>
   )

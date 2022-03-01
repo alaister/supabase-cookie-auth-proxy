@@ -231,8 +231,12 @@ export async function handleRequest(request: Request): Promise<Response> {
     if (session) {
       await WORKERS_DEMO_KV.delete(session.id)
 
-      const cookie = serialize('sb-session-id', session.id, {
+      const cookie = serialize('sb-session-id', '', {
         expires: new Date(0),
+        path: '/',
+        secure: true,
+        httpOnly: true,
+        sameSite: 'lax',
       })
       response.headers.set('Set-Cookie', cookie)
     }
