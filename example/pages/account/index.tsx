@@ -13,9 +13,9 @@ const AccountPage: NextPageWithLayout = () => {
   const isLoggedIn = useIsLoggedIn()
 
   const { data, isLoading } = useSessionsQuery()
+  console.log('data:', data)
 
   useEffect(() => {
-    console.log('hi')
     const subscription = supabase
       .from(`sessions`)
       .on('*', (payload) => {
@@ -34,6 +34,8 @@ const AccountPage: NextPageWithLayout = () => {
                 ),
               }
             }
+
+            return entity
           }
 
           return Array.isArray(oldData) ? oldData.map(update) : update(oldData)
