@@ -13,7 +13,6 @@ const AccountPage: NextPageWithLayout = () => {
   const isLoggedIn = useIsLoggedIn()
 
   const { data, isLoading } = useSessionsQuery()
-  console.log('data:', data)
 
   useEffect(() => {
     const subscription = supabase
@@ -23,7 +22,7 @@ const AccountPage: NextPageWithLayout = () => {
           const update = (entity: any) => {
             if (payload.eventType === 'INSERT') {
               return {
-                comments: [payload.new, ...entity.sessions],
+                sessions: [payload.new, ...entity.sessions],
               }
             }
 
