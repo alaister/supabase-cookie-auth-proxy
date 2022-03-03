@@ -4,7 +4,7 @@ import { PropsWithChildren } from 'react'
 const UnauthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-8 py-4">
+      <header className="px-4 py-4 md:px-8">
         <nav className="flex items-center justify-between">
           <div>
             <Link href="/">

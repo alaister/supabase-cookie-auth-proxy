@@ -7,6 +7,7 @@ import {
   QueryClient,
   useQueryClient,
 } from 'react-query'
+import Avatar from '../../components/Avatar'
 import DynamicLayout from '../../components/DynamicLayout'
 import {
   useCommentsForPostQuery,
@@ -146,12 +147,27 @@ const PostShowPage: NextPageWithLayout = () => {
           commentsData?.comments ? ` (${commentsData.comments.length})` : ''
         }`}</h3>
 
-        <ul>
+        <ul className="space-y-4">
           {isLoadingComments ? (
             <li>Loading...</li>
           ) : (
             commentsData?.comments.map((comment) => (
-              <li key={comment.id}>{comment.body}</li>
+              <li key={comment.id} className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="font-medium">{comment.body}</span>
+                  <span className="flex">
+                    <Avatar
+                      name={comment.author.full_name}
+                      avatarUrl={comment.author.avatar_url}
+                    />
+                    <span className="ml-2 text-sm">
+                      {comment.author.full_name}
+                    </span>
+                  </span>
+                </div>
+
+                <span>{new Date(comment.created_at).toLocaleString()}</span>
+              </li>
             ))
           )}
         </ul>

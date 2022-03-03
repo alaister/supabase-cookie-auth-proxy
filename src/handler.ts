@@ -26,7 +26,7 @@ export async function handleRequest(request: Request): Promise<Response> {
     upgradeHeader === 'websocket' &&
     url.pathname === '/realtime/v1/websocket'
   ) {
-    // TODO: check origin matches
+    // TODO: check origin matches to prevent CSWSH
 
     const accessToken =
       (await getSession(request.headers.get('Cookie')))?.token ??
@@ -162,7 +162,10 @@ export async function handleRequest(request: Request): Promise<Response> {
     return response
   }
 
-  if (request.method === 'POST' && url.pathname === '/auth/v1/token') {
+  if (
+    request.method === 'POST' &&
+    (url.pathname === '/auth/v1/token' || url.pathname === '/auth/v1/signup')
+  ) {
     const supabaseResponse = await fetch(
       supabaseUrl.toString(),
       supabaseRequest,
@@ -173,9 +176,12 @@ export async function handleRequest(request: Request): Promise<Response> {
       supabaseResponse,
     )
 
-    const body = await supabaseResponse.json<{ user?: User }>()
+    const body = await supabaseResponse.json<{
+      user?: User
+      access_token?: string
+    }>()
 
-    if (body.user) {
+    if (body.user && body.access_token) {
       const { user } = body
       const sessionId = crypto.randomUUID()
       const expires = Math.floor(Date.now() / 1000) + 31540000 // in 1 year

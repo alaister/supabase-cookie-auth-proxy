@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { PropsWithChildren, useCallback, useEffect } from 'react'
 import { useSignOutMutation } from '../lib/api/auth'
 import { useAuth } from '../lib/auth'
+import Avatar from './Avatar'
 
 const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
   const router = useRouter()
@@ -21,7 +22,7 @@ const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-8 py-4">
+      <header className="px-4 py-4 md:px-8">
         <nav className="flex items-center justify-between">
           <div>
             <Link href="/">
@@ -31,10 +32,16 @@ const AuthenticatedLayout = ({ children }: PropsWithChildren<{}>) => {
 
           <div className="flex items-center space-x-4">
             <Link href="/account">
-              <a>
-                {isLoading
-                  ? 'Loading...'
-                  : user?.user_metadata.full_name ?? user?.email ?? 'Account'}
+              <a className="inline-flex items-center">
+                <Avatar
+                  name={user?.user_metadata.full_name}
+                  avatarUrl={user?.user_metadata.avatar_url}
+                />
+                <span className="ml-2">
+                  {isLoading
+                    ? 'Loading...'
+                    : user?.user_metadata.full_name ?? user?.email ?? 'Account'}
+                </span>
               </a>
             </Link>
 

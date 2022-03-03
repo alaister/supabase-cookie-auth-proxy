@@ -14,6 +14,12 @@ type Comment = {
   user_id: string
   post_id: string
   body: string
+  author: {
+    id: string
+    created_at: string
+    full_name?: string
+    avatar_url?: string
+  }
 }
 
 /* Get Comments */
@@ -21,7 +27,7 @@ type Comment = {
 export async function getCommentsForPost(postId: string, signal?: AbortSignal) {
   let query = supabase
     .from<Comment>('comments')
-    .select(`*`)
+    .select(`*,author:users(*)`)
     .eq('post_id', postId)
     .order('created_at', { ascending: true })
 
@@ -67,7 +73,7 @@ export async function createComment({ postId, body }: CreateCommentVariables) {
       post_id: postId,
       body,
     })
-    .select('*')
+    .select('*,author:users(*)')
     .single()
 
   if (error) {
