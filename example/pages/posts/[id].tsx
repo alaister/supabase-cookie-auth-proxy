@@ -60,11 +60,19 @@ const PostShowPage: NextPageWithLayout = () => {
     const subscription = supabase
       .from(`comments:post_id=eq.${firstStr(id)}`)
       .on('*', (payload) => {
-        queryClient.setQueriesData(['comments', firstStr(id)], (oldData) => {
-          const update = (entity: any) => {
+        queryClient.setQueriesData(
+          ['comments', firstStr(id)],
+          async (entity: any) => {
             if (payload.eventType === 'INSERT') {
+              const author = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', payload.new.user_id)
+                .single()
+              console.log('author:', author)
+
               return {
-                comments: [...entity.comments, payload.new],
+                comments: [...entity.comments, { ...payload.new, author }],
               }
             }
 
@@ -72,7 +80,7 @@ const PostShowPage: NextPageWithLayout = () => {
               return {
                 comments: entity.comments.map((comment: any) => {
                   if (comment.id === payload.old.id) {
-                    return payload.new
+                    return { ...comment, ...payload.new }
                   }
 
                   return comment
@@ -87,10 +95,10 @@ const PostShowPage: NextPageWithLayout = () => {
                 ),
               }
             }
-          }
 
-          return Array.isArray(oldData) ? oldData.map(update) : update(oldData)
-        })
+            return entity
+          }
+        )
       })
       .subscribe()
 
