@@ -64,16 +64,10 @@ const PostShowPage: NextPageWithLayout = () => {
           ['comments', firstStr(id)],
           async (entity: any) => {
             if (payload.eventType === 'INSERT') {
-              const author = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', payload.new.user_id)
-                .single()
-              console.log('author:', author)
-
-              return {
-                comments: [...entity.comments, { ...payload.new, author }],
-              }
+              // we don't have the author included with the comment, so we'll just tell
+              // react-query to refetch the data
+              queryClient.invalidateQueries(['comments', firstStr(id)])
+              return entity
             }
 
             if (payload.eventType === 'UPDATE') {
