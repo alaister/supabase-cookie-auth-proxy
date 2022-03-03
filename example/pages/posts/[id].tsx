@@ -64,7 +64,7 @@ const PostShowPage: NextPageWithLayout = () => {
       .on('*', (payload) => {
         queryClient.setQueriesData(
           ['comments', firstStr(id)],
-          async (entity: any) => {
+          (entity: any) => {
             if (payload.eventType === 'INSERT') {
               // we don't have the author included with the comment, so we'll just tell
               // react-query to refetch the data
