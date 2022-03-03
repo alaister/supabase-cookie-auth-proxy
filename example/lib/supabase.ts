@@ -13,17 +13,13 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   {
     fetch: (...args) => fetch(...args),
-    ...(process.env.NODE_ENV === 'production' && {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    }),
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionInUrl: false,
   }
 )
 
-if (process.env.NODE_ENV === 'production') {
-  // Set a dummy jwt so logout gets called
-  supabase.auth.setAuth('1')
-}
+// Set a dummy jwt so logout gets called
+supabase.auth.setAuth('1')
 
 export default supabase

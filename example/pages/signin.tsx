@@ -45,7 +45,7 @@ const SignInPage: NextPageWithLayout = () => {
           </h2>
         </div>
 
-        <div>
+        {/* <div>
           <button
             onClick={signInWithGitHub}
             className="group relative flex w-full items-center justify-center space-x-2 rounded-md border border-transparent bg-[#161614] px-4 py-2 text-sm font-medium text-white hover:bg-[#24292E] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
@@ -63,9 +63,9 @@ const SignInPage: NextPageWithLayout = () => {
             </svg>
             <span>Sign in with GitHub</span>
           </button>
-        </div>
+        </div> */}
 
-        <div className="relative">
+        {/* <div className="relative">
           <div
             className="absolute inset-0 flex items-center"
             aria-hidden="true"
@@ -75,7 +75,7 @@ const SignInPage: NextPageWithLayout = () => {
           <div className="relative flex justify-center">
             <span className="px-2 text-sm text-gray-500 bg-white">Or</span>
           </div>
-        </div>
+        </div> */}
 
         <form className="mt-8 space-y-6" onSubmit={onSubmit}>
           <div className="-space-y-px rounded-md shadow-sm">

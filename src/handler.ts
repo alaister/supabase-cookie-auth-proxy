@@ -7,6 +7,7 @@ declare global {
   const JWT_SECRET: string
   const SUPABASE_HOSTNAME: string
   const SUPABASE_ANON_KEY: string
+  const SUPABASE_SERVICE_KEY: string
 }
 
 async function websocket(url: string) {
@@ -131,7 +132,70 @@ export async function handleRequest(request: Request): Promise<Response> {
 
   const supabaseRequest = new Request(request)
   supabaseRequest.headers.set('apikey', SUPABASE_ANON_KEY)
+  supabaseRequest.headers.set('Origin', url.origin)
   supabaseRequest.headers.set('Authorization', `Bearer ${SUPABASE_ANON_KEY}`)
+
+  if (request.method === 'GET' && url.pathname === '/auth/v1/authorize') {
+    const supabaseResponse = await fetch(
+      supabaseUrl.toString(),
+      supabaseRequest,
+    )
+
+    const response = new Response(
+      supabaseResponse.clone().body,
+      supabaseResponse,
+    )
+
+    const location = response.headers.get('location')
+    if (location) {
+      const locationURL = new URL(location)
+
+      const redirectURI = locationURL.searchParams.get('redirect_uri')
+      if (redirectURI) {
+        locationURL.searchParams.set(
+          'redirect_uri',
+          `${url.origin}/supabase/auth/v1/callback`,
+        )
+
+        response.headers.set('location', locationURL.toString())
+      }
+    }
+
+    removeCors(response)
+    return response
+  }
+
+  if (request.method === 'GET' && url.pathname === '/auth/v1/callback') {
+    const supabaseResponse = await fetch(
+      supabaseUrl.toString(),
+      supabaseRequest,
+    )
+
+    const response = new Response(
+      supabaseResponse.clone().body,
+      supabaseResponse,
+    )
+
+    // TODO: once this has been fixed: https://github.com/supabase/supabase/discussions/1192#discussioncomment-848941
+    // const location = response.headers.get('location')
+    // if (location) {
+    //   console.log('location:', location)
+    // const locationURL = new URL(location)
+
+    // const redirectURI = locationURL.searchParams.get('redirect_uri')
+    // if (redirectURI) {
+    //   locationURL.searchParams.set(
+    //     'redirect_uri',
+    //     `${url.origin}/supabase/auth/v1/callback`,
+    //   )
+
+    //   response.headers.set('location', locationURL.toString())
+    // }
+    // }
+
+    removeCors(response)
+    return response
+  }
 
   if (request.method === 'POST' && url.pathname === '/auth/v1/token') {
     const supabaseResponse = await fetch(
@@ -162,16 +226,34 @@ export async function handleRequest(request: Request): Promise<Response> {
         JWT_SECRET,
       )
 
-      await WORKERS_DEMO_KV.put(
-        sessionId,
-        JSON.stringify({
-          user,
-          token,
+      await Promise.all([
+        WORKERS_DEMO_KV.put(
+          sessionId,
+          JSON.stringify({
+            user,
+            token,
+          }),
+          {
+            expiration: expires,
+          },
+        ),
+        fetch(`https://${SUPABASE_HOSTNAME}/rest/v1/sessions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: sessionId,
+            user_id: user.id,
+            expires_at: new Date(expires * 1000).toISOString(),
+            ip: request.headers.get('CF-Connecting-IP'),
+            user_agent: request.headers.get('User-Agent'),
+            country: request.cf?.country ?? null,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+          },
         }),
-        {
-          expiration: expires,
-        },
-      )
+      ])
 
       const cookie = serialize('sb-session-id', sessionId, {
         expires: new Date(expires * 1000),

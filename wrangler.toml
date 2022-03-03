@@ -6,7 +6,7 @@ route = ""
 workers_dev = true
 compatibility_date = "2022-02-28"
 kv_namespaces = [
-	{ binding = "WORKERS_DEMO_KV", id = "a291584c6e5342f597e8eadfd73c1e77" } # SESSIONS
+	{ binding = "WORKERS_DEMO_KV", id = "a291584c6e5342f597e8eadfd73c1e77", preview_id = "1029c8d5c3f44de6acad550024602947" } # SESSIONS
 ]
 
 [vars]

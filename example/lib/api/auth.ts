@@ -13,23 +13,10 @@ import { UnauthenticatedError } from './utils'
 
 export async function getSession(
   signal?: AbortSignal
-): Promise<{ session: { user: User | null } }> {
-  const pathname =
-    process.env.NODE_ENV === 'production' ? '/edge/v1/session' : '/auth/v1/user'
+): Promise<{ session: { id: string; user: User } | null }> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}${pathname}`,
-    {
-      signal,
-      ...(process.env.NODE_ENV !== 'production' && {
-        headers: {
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-          Authorization: `Bearer ${
-            supabase.auth.session()?.access_token ??
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-          }`,
-        },
-      }),
-    }
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/edge/v1/session`,
+    { signal }
   )
 
   if (response.status === 401) {
@@ -37,18 +24,15 @@ export async function getSession(
   }
 
   if (response.status !== 200) {
-    return { session: { user: null } }
+    return { session: null }
   }
 
   const session = await response.json()
-  if (process.env.NODE_ENV !== 'production') {
-    return { session: { user: session as User } }
-  }
 
-  return { session: { user: session.user as User } }
+  return { session: { id: session.id, user: session.user as User } }
 }
 
-type SessionData = { session: { user: User | null } }
+type SessionData = { session: { id: string; user: User } | null }
 type SessionError = PostgrestError
 
 export const useSessionQuery = (
