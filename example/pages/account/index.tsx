@@ -19,27 +19,24 @@ const AccountPage: NextPageWithLayout = () => {
     const subscription = supabase
       .from(`sessions`)
       .on('*', (payload) => {
-        queryClient.setQueriesData(['sessions'], (oldData) => {
-          console.log('payload:', payload)
-          console.log('oldData:', oldData)
-          // const update = (entity: any) => {
-          //   if (payload.eventType === 'INSERT') {
-          //     return {
-          //       comments: [...entity.comments, payload.new],
-          //     }
-          //   }
+        queryClient.setQueriesData(['sessions'], (oldData: any) => {
+          const update = (entity: any) => {
+            if (payload.eventType === 'INSERT') {
+              return {
+                comments: [payload.new, ...entity.sessions],
+              }
+            }
 
-          //   if (payload.eventType === 'DELETE') {
-          //     return {
-          //       comments: entity.comments.filter(
-          //         (comment: any) => comment.id !== payload.old.id
-          //       ),
-          //     }
-          //   }
-          // }
+            if (payload.eventType === 'DELETE') {
+              return {
+                sessions: entity.sessions.filter(
+                  (session: any) => session.id !== payload.old.id
+                ),
+              }
+            }
+          }
 
-          // return Array.isArray(oldData) ? oldData.map(update) : update(oldData)
-          return oldData
+          return Array.isArray(oldData) ? oldData.map(update) : update(oldData)
         })
       })
       .subscribe()
