@@ -1,6 +1,9 @@
-import { parse, serialize } from 'cookie'
 import jwt from '@tsndr/cloudflare-worker-jwt'
-import { Session, User, Without } from './types'
+import { serialize } from 'cookie'
+import { removeCors } from './cors'
+import { createSession, deleteSession, getSession } from './sessions'
+import { User } from './types'
+import { websocket } from './websocket'
 
 declare global {
   const WORKERS_DEMO_KV: KVNamespace
@@ -8,44 +11,6 @@ declare global {
   const SUPABASE_HOSTNAME: string
   const SUPABASE_ANON_KEY: string
   const SUPABASE_SERVICE_KEY: string
-}
-
-async function websocket(url: string) {
-  const resp = await fetch(url, {
-    headers: {
-      Upgrade: 'websocket',
-    },
-  })
-
-  const ws = resp.webSocket
-  if (!ws) {
-    throw new Error("server didn't accept WebSocket")
-  }
-
-  return ws
-}
-
-async function getSession(cookiesStr?: string | null) {
-  if (cookiesStr) {
-    const cookies = parse(cookiesStr)
-    const sessionId = cookies['sb-session-id']
-    if (sessionId) {
-      const session = await WORKERS_DEMO_KV.get<Without<Session, 'id'>>(
-        sessionId,
-        'json',
-      )
-      if (session) {
-        return { id: sessionId, ...session }
-      }
-    }
-  }
-}
-
-function removeCors(response: Response) {
-  response.headers.delete('access-control-allow-credentials')
-  response.headers.delete('access-control-allow-headers')
-  response.headers.delete('access-control-allow-methods')
-  response.headers.delete('access-control-allow-origin')
 }
 
 export async function handleRequest(request: Request): Promise<Response> {
@@ -226,34 +191,13 @@ export async function handleRequest(request: Request): Promise<Response> {
         JWT_SECRET,
       )
 
-      await Promise.all([
-        WORKERS_DEMO_KV.put(
-          sessionId,
-          JSON.stringify({
-            user,
-            token,
-          }),
-          {
-            expiration: expires,
-          },
-        ),
-        fetch(`https://${SUPABASE_HOSTNAME}/rest/v1/sessions`, {
-          method: 'POST',
-          body: JSON.stringify({
-            id: sessionId,
-            user_id: user.id,
-            expires_at: new Date(expires * 1000).toISOString(),
-            ip: request.headers.get('CF-Connecting-IP'),
-            user_agent: request.headers.get('User-Agent'),
-            country: request.cf?.country ?? null,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-          },
-        }),
-      ])
+      await createSession({
+        request,
+        sessionId,
+        user,
+        token,
+        expires,
+      })
 
       const cookie = serialize('sb-session-id', sessionId, {
         expires: new Date(expires * 1000),
@@ -298,6 +242,51 @@ export async function handleRequest(request: Request): Promise<Response> {
     )
   }
 
+  if (
+    request.method === 'DELETE' &&
+    url.pathname.startsWith('/edge/v1/sessions/')
+  ) {
+    if (!session) {
+      return new Response(null, { status: 404 })
+    }
+
+    const sessionId = url.pathname.slice(18)
+
+    const response = await fetch(
+      `https://${SUPABASE_HOSTNAME}/rest/v1/sessions?id=eq.${sessionId}&user_id=eq.${session.user.id}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/vnd.pgrst.object+json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        },
+      },
+    )
+
+    if (response.status !== 200) {
+      return new Response(null, { status: 404 })
+    }
+
+    const dbSession = (await response.json()) as { id?: string } | undefined
+
+    if (!dbSession?.id) {
+      return new Response(null, { status: 404 })
+    }
+
+    await deleteSession(dbSession.id)
+
+    return new Response(
+      // Filter out token
+      JSON.stringify({ id: sessionId }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+  }
+
   const accessToken = session?.token
   supabaseRequest.headers.set(
     'Authorization',
@@ -311,7 +300,7 @@ export async function handleRequest(request: Request): Promise<Response> {
 
   if (request.method === 'POST' && url.pathname === '/auth/v1/logout') {
     if (session) {
-      await WORKERS_DEMO_KV.delete(session.id)
+      await deleteSession(session.id)
 
       const cookie = serialize('sb-session-id', '', {
         expires: new Date(0),
