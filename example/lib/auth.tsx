@@ -25,7 +25,6 @@ export const AuthProvider = ({
   const { data, isLoading } = useSessionQuery({
     initialData: initialSession ? { session: initialSession } : undefined,
   })
-  console.log('isLoading:', isLoading)
 
   const value = useMemo(
     () => ({
