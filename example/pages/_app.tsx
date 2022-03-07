@@ -36,7 +36,9 @@ const CustomApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
-        <AuthProvider>{getLayout(<Component {...pageProps} />)}</AuthProvider>
+        <AuthProvider initialSession={pageProps.initialSession}>
+          {getLayout(<Component {...pageProps} />)}
+        </AuthProvider>
       </Hydrate>
     </QueryClientProvider>
   )

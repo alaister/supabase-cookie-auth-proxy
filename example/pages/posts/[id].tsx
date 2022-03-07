@@ -54,8 +54,6 @@ const PostShowPage: NextPageWithLayout = () => {
   const { data, isLoading } = usePostQuery(firstStr(id))
   const { data: commentsData, isLoading: isLoadingComments } =
     useCommentsForPostQuery(firstStr(id))
-  console.log('data:', data)
-  console.log('commentsData:', commentsData)
 
   const isLoggedIn = useIsLoggedIn()
   useEffect(() => {
@@ -69,7 +67,6 @@ const PostShowPage: NextPageWithLayout = () => {
               // we don't have the author included with the comment, so we'll just tell
               // react-query to refetch the data
               queryClient.invalidateQueries(['comments', firstStr(id)])
-              console.log('entity:', entity)
               return entity
             }
 

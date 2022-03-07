@@ -14,8 +14,18 @@ export const AuthContext = createContext<AuthContextProps>({
   isLoading: true,
 })
 
-export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { data, isLoading } = useSessionQuery()
+type AuthProviderProps = {
+  initialSession?: { id: string; user: User } | null
+}
+
+export const AuthProvider = ({
+  children,
+  initialSession = null,
+}: PropsWithChildren<AuthProviderProps>) => {
+  const { data, isLoading } = useSessionQuery({
+    initialData: initialSession ? { session: initialSession } : undefined,
+  })
+  console.log('isLoading:', isLoading)
 
   const value = useMemo(
     () => ({

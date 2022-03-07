@@ -1,4 +1,5 @@
 import { GetStaticProps } from 'next'
+import Link from 'next/link'
 import { dehydrate, DehydratedState, QueryClient } from 'react-query'
 import DynamicLayout from '../components/DynamicLayout'
 import Posts from '../components/Posts'
@@ -19,10 +20,18 @@ export const getStaticProps: GetStaticProps<{
 
 const IndexPage: NextPageWithLayout = () => {
   return (
-    <div>
+    <div className="space-y-4">
       <h2 className="text-lg font-bold">Posts</h2>
 
       <Posts />
+
+      <hr />
+
+      <div>
+        <Link href="/ssr">
+          <a>SSR Example Page</a>
+        </Link>
+      </div>
     </div>
   )
 }
