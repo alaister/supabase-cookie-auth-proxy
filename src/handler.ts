@@ -6,7 +6,7 @@ import { User } from './types'
 import { websocket } from './websocket'
 
 declare global {
-  const WORKERS_DEMO_KV: KVNamespace
+  const SESSIONS_KV: KVNamespace
   const JWT_SECRET: string
   const SUPABASE_HOSTNAME: string
   const SUPABASE_ANON_KEY: string

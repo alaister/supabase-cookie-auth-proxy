@@ -6,7 +6,7 @@ export async function getSession(cookiesStr?: string | null) {
     const cookies = parse(cookiesStr)
     const sessionId = cookies['sb-session-id']
     if (sessionId) {
-      const session = await WORKERS_DEMO_KV.get<Without<Session, 'id'>>(
+      const session = await SESSIONS_KV.get<Without<Session, 'id'>>(
         sessionId,
         'json',
       )
@@ -33,7 +33,7 @@ export async function createSession({
   expires,
 }: CreateSessionOptions) {
   await Promise.all([
-    WORKERS_DEMO_KV.put(
+    SESSIONS_KV.put(
       sessionId,
       JSON.stringify({
         user,
@@ -64,7 +64,7 @@ export async function createSession({
 
 export async function deleteSession(sessionId: string) {
   await Promise.all([
-    WORKERS_DEMO_KV.delete(sessionId),
+    SESSIONS_KV.delete(sessionId),
     fetch(`https://${SUPABASE_HOSTNAME}/rest/v1/sessions?id=eq.${sessionId}`, {
       method: 'DELETE',
       headers: {

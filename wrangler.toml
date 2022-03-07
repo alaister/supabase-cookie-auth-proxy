@@ -1,17 +1,17 @@
-name = "workers-demo" # supabase-cookie-auth-proxy
+name = "supabase-cookie-auth-proxy"
 type = "javascript"
 zone_id = ""
-account_id = "f72ed0aa3309c7d4cd6da49161ff9353"
+account_id = ""
 route = ""
 workers_dev = true
 compatibility_date = "2022-02-28"
 kv_namespaces = [
-	{ binding = "WORKERS_DEMO_KV", id = "a291584c6e5342f597e8eadfd73c1e77", preview_id = "1029c8d5c3f44de6acad550024602947" } # SESSIONS
+	{ binding = "SESSIONS_KV", id = "" }
 ]
 
 [vars]
-SUPABASE_HOSTNAME = "rvpwpikjljvsccsmfrix.supabase.co"
-SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYyODY4OTI4MiwiZXhwIjoxOTQ0MjY1MjgyfQ.hdBg2x_976TxNVbG2VbIRhF4Zy1YEUF5uL-Gyi4pavs"
+SUPABASE_HOSTNAME = ""
+SUPABASE_ANON_KEY = ""
 
 [build]
 command = "npm install && npm run build"
