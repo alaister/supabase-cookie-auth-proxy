@@ -2,6 +2,8 @@
 
 Utilizing Cloudflare workers to use cookie based session auth, instead of refreshing JWTs.
 
+[Watch a video explanation](https://www.youtube.com/watch?v=Y1bGFANu3DI)
+
 ### :warning: This is a work in progress
 
 ## How It Works

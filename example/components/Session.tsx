@@ -65,8 +65,7 @@ const Session = ({ session }: { session: SessionType }) => {
             <span className="text-xs font-medium tracking-wide text-gray-600 uppercase">
               IP Address
             </span>
-            {/* {session.ip} */}
-            Hidden for Demo
+            {session.ip}
           </div>
         )}
       </div>
